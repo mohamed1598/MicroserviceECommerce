@@ -1,3 +1,4 @@
+using Catalog.API.Data;
 using Catalog.API.Data.Interfaces;
 using Catalog.API.Repositories;
 using Catalog.API.Repositories.Interfaces;
@@ -15,7 +16,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.Configure<CatalogDatabaseSettings>(builder.Configuration.GetSection(nameof(CatalogDatabaseSettings)));
 builder.Services.AddSingleton<ICatalogDatabaseSettings>(sp =>
     sp.GetRequiredService<IOptions<CatalogDatabaseSettings>>().Value);
-builder.Services.AddTransient<ICatalogContext,ICatalogContext>();
+builder.Services.AddTransient<ICatalogContext,CatalogContext>();
 builder.Services.AddTransient<IProductRepository,ProductRepository>();
 
 var app = builder.Build();

@@ -35,7 +35,7 @@ namespace Catalog.API.Controllers
             }
             return Ok(product);
         }
-        [Route("[action]/{category}")]
+        [Route("[action]/{categoryName}")]
         [HttpGet]
         [ProducesResponseType(typeof(IEnumerable<Product>),(int) HttpStatusCode.OK)]
         public async Task<ActionResult<IEnumerable<Product>>> GetProductByCategory(string categoryName)
