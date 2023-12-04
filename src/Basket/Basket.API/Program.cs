@@ -1,7 +1,11 @@
 using Basket.API.Data;
 using Basket.API.Data.Interfaces;
+using Basket.API.Helpers;
 using Basket.API.Repositories;
 using Basket.API.Repositories.Interfaces;
+using EventBusRabbitMQ;
+using EventBusRabbitMQ.Producer;
+using RabbitMQ.Client;
 using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,6 +18,29 @@ builder.Services.AddSingleton<ConnectionMultiplexer>(sp =>
 });
 builder.Services.AddTransient<IBasketContext, BasketContext>();
 builder.Services.AddTransient<IBasketRepository, BasketRepository>();
+builder.Services.AddAutoMapper(typeof(MappingProfile));
+builder.Services.AddSingleton<IRabbitMQConnection>(
+                sp =>
+                {
+                    var factory = new ConnectionFactory()
+                    {
+                        HostName = builder.Configuration["EventBus:HostName"]
+                    };
+
+                    if (!string.IsNullOrEmpty(builder.Configuration["EventBus:UserName"]))
+                    {
+                        factory.UserName = builder.Configuration["EventBus:UserName"];
+                    }
+                    if (!string.IsNullOrEmpty(builder.Configuration["EventBus:Password"]))
+                    {
+                        factory.Password = builder.Configuration["EventBus:Password"];
+                    }
+
+                    return new RabbitMQConnection(factory);
+
+                }
+                );
+builder.Services.AddSingleton<EventBusRabbitMQProducer>();
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

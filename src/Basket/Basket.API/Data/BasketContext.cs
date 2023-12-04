@@ -10,7 +10,7 @@ namespace Basket.API.Data
         public BasketContext(ConnectionMultiplexer redisConnection)
         {
             _redisConnection = redisConnection;
-            Redis = redisConnection.GetDatabase();
+            Redis = _redisConnection.GetDatabase();
         }
 
         public IDatabase Redis { get; }
