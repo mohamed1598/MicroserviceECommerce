@@ -13,6 +13,14 @@ services:
     restart: always
     ports:
         - "6379:6379"
+  orderdb:
+    container_name: orderdb
+    restart: always
+    ports:
+        - "1433:1433"
+    environment:
+        SA_PASSWORD: "yourStrong(!)Password"
+        ACCEPT_EULA: "Y"
   rabbitmq:
     container_name: rabbitmq
     restart: always
@@ -20,6 +28,7 @@ services:
         - "5672:5672"
         - "15672:15672"
   catalog.api:
+    container_name: catalogapi
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - "CatalogDatabaseSettings:ConnectionString=mongodb://catalogdb:27017"
@@ -34,12 +43,32 @@ services:
       - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
       - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
   basket.api:
+    container_name: basketapi
+    restart: on-failure
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - "ConnectionStrings:Redis=basketdb:6379"
       - "EventBus:HostName=rabbitmq" 
     depends_on:
       - basketdb
+      - rabbitmq
     ports:
       - "8001:8080"
-
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+  ordering.api:
+    container_name: orderingapi
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080 
+      - "ConnectionStrings:Redis=Server=orderdb,1433;Database=OrderDb;User Id=sa;Password=yourStrong(!)Password;TrustServerCertificate=True;"
+      - "EventBus:HostName=rabbitmq" 
+    depends_on:
+      - orderdb
+      - rabbitmq
+    ports:
+      - "8002:8080"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro

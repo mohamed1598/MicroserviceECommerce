@@ -1,13 +1,15 @@
-using Microsoft.AspNetCore.Identity;
+using EventBusRabbitMQ;
 using Microsoft.EntityFrameworkCore;
+using Ordering.API.Extenstions;
+using Ordering.API.Mapping;
+using Ordering.API.RabbitMQ;
 using Ordering.Application.Handlers;
-using Ordering.Application.Mapper;
 using Ordering.Core.Repositories;
 using Ordering.Core.Repositories.Base;
 using Ordering.Infrastracture.Data;
 using Ordering.Infrastracture.Repositories;
 using Ordering.Infrastracture.Repositories.Base;
-using System.Linq;
+using RabbitMQ.Client;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,14 +20,35 @@ builder.Services.AddDbContext<OrderContext>(c =>
 {
     c.UseSqlServer(builder.Configuration.GetConnectionString("OrderConnection"));
 },ServiceLifetime.Singleton);
-builder.Services.AddAutoMapper(typeof(OrderMappingProfile));
+builder.Services.AddAutoMapper(typeof(OrderMapping));
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(typeof(CheckoutOrderHandler).Assembly));
 
 builder.Services.AddTransient<IOrderRepository, OrderRepository>();
 
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
-builder.Services.AddScoped(typeof(IOrderRepository), typeof(OrderRepository));
+builder.Services.AddSingleton(typeof(IOrderRepository), typeof(OrderRepository));
+builder.Services.AddSingleton<IRabbitMQConnection>(
+                sp =>
+                {
+                    var factory = new ConnectionFactory()
+                    {
+                        HostName = builder.Configuration["EventBus:HostName"]
+                    };
 
+                    if (!string.IsNullOrEmpty(builder.Configuration["EventBus:UserName"]))
+                    {
+                        factory.UserName = builder.Configuration["EventBus:UserName"];
+                    }
+                    if (!string.IsNullOrEmpty(builder.Configuration["EventBus:Password"]))
+                    {
+                        factory.Password = builder.Configuration["EventBus:Password"];
+                    }
+
+                    return new RabbitMQConnection(factory);
+
+                }
+                );
+builder.Services.AddSingleton<EventBusRabbitMQConsumer>();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -58,5 +81,5 @@ if (app.Environment.IsDevelopment())
 app.UseAuthorization();
 
 app.MapControllers();
-
+app.UseRabbitListener();
 app.Run();
