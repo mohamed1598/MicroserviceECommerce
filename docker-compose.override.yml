@@ -13,6 +13,7 @@ services:
     restart: always
     ports:
         - "6379:6379"
+<<<<<<< HEAD
   discountdb:
     container_name: discountdb
     environment:
@@ -34,6 +35,16 @@ services:
         - "5050:80"
     volumes:
         - pgadmin_data:/root/.pgadmin
+=======
+  orderdb:
+    container_name: orderdb
+    restart: always
+    ports:
+        - "1433:1433"
+    environment:
+        SA_PASSWORD: "yourStrong(!)Password"
+        ACCEPT_EULA: "Y"
+>>>>>>> 85d325f0704757e2b7f76c618305be8f43263def
   rabbitmq:
     container_name: rabbitmq
     restart: always
@@ -41,6 +52,7 @@ services:
         - "5672:5672"
         - "15672:15672"
   catalog.api:
+    container_name: catalogapi
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - "CatalogDatabaseSettings:ConnectionString=mongodb://catalogdb:27017"
@@ -50,17 +62,51 @@ services:
       - catalogdb
     ports:
       - "8000:8080"
-      - "8081"
     volumes:
       - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
       - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
   basket.api:
+    container_name: basketapi
+    restart: on-failure
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - "ConnectionStrings:Redis=basketdb:6379"
       - "EventBus:HostName=rabbitmq" 
     depends_on:
       - basketdb
+      - rabbitmq
     ports:
       - "8001:8080"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+  ordering.api:
+    container_name: orderingapi
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080 
+      - "ConnectionStrings:Redis=Server=orderdb,1433;Database=OrderDb;User Id=sa;Password=yourStrong(!)Password;TrustServerCertificate=True;"
+      - "EventBus:HostName=rabbitmq" 
+    depends_on:
+      - orderdb
+      - rabbitmq
+    ports:
+      - "8002:8080"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+  ocelotapigateway:
+    container_name: ocelopapigateway
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080 
+    depends_on:
+      - catalog.api
+      - basket.api
+      - ordering.api
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+    ports:
+      - "7000:8080"
 
