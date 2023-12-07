@@ -10,8 +10,8 @@ builder.Configuration.AddJsonFile("ocelot.json",
 
 
 var app = builder.Build();
+await app.UseOcelot();
 
 app.MapGet("/", () => "Ocelot Working!");
-//app.UseOcelot().Wait();
 
 app.Run();
