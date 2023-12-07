@@ -13,7 +13,6 @@ services:
     restart: always
     ports:
         - "6379:6379"
-<<<<<<< HEAD
   discountdb:
     container_name: discountdb
     environment:
@@ -35,7 +34,6 @@ services:
         - "5050:80"
     volumes:
         - pgadmin_data:/root/.pgadmin
-=======
   orderdb:
     container_name: orderdb
     restart: always
@@ -44,7 +42,6 @@ services:
     environment:
         SA_PASSWORD: "yourStrong(!)Password"
         ACCEPT_EULA: "Y"
->>>>>>> 85d325f0704757e2b7f76c618305be8f43263def
   rabbitmq:
     container_name: rabbitmq
     restart: always

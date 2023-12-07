@@ -7,18 +7,15 @@ services:
   basketdb:
     image: redis
     
-<<<<<<< HEAD
   discountdb:
     image: postgres
 
   pgadmin:
     image: dpage/pgadmin4
 
-=======
   orderdb:
     image: mcr.microsoft.com/mssql/server
   
->>>>>>> 85d325f0704757e2b7f76c618305be8f43263def
   rabbitmq:
     image: rabbitmq:3-management-alpine
 
