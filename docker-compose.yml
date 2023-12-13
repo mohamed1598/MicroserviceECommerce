@@ -37,6 +37,12 @@ services:
       context: .
       dockerfile: src/Ordering/Ordering.API/Dockerfile
 
+  discount.api:
+    image: ${DOCKER_REGISTRY-}discountapi
+    build:
+      context: .
+      dockerfile: src/Discount/Discount.API/Dockerfile
+
   ocelotapigateway:
     image: ${DOCKER_REGISTRY-}ocelotapigateway
     build:
@@ -47,6 +53,7 @@ volumes:
     mongo_data:
     postgres_data:
     pgadmin_data:
+
 
 
 
