@@ -68,7 +68,8 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - "ConnectionStrings:Redis=basketdb:6379"
-      - "EventBus:HostName=rabbitmq" 
+      - "GrpcSettings:DiscountUrl=discount.grpc" 
+      - "EventBus:HostName=rabbitmq"
     depends_on:
       - basketdb
       - rabbitmq
@@ -102,6 +103,20 @@ services:
       - discountdb
     ports:
       - "8003:8080"
+  discount.grpc:
+    container_name: discount.grpc
+    restart: on-failure
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - "DatabaseSettings:ConnectionString=Server=discountdb;Port=5432;Database=DiscountDb;User Id=admin;Password=admin1234"
+    depends_on:
+      - discountdb
+    ports:
+      - "8004:8080"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
   ocelotapigateway:
     container_name: ocelopapigateway
     environment:
@@ -116,4 +131,3 @@ services:
       - catalog.api
       - basket.api
       - ordering.api
-

@@ -49,10 +49,17 @@ services:
       context: .
       dockerfile: src/ApiGateway/OcelotApiGateway/Dockerfile
 
+  discount.grpc:
+    image: ${DOCKER_REGISTRY-}discountgrpc
+    build:
+      context: .
+      dockerfile: src/Discount/Discount.GRPC/Dockerfile
+
 volumes:
     mongo_data:
     postgres_data:
     pgadmin_data:
+
 
 
 

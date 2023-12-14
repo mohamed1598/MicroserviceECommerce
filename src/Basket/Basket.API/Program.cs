@@ -1,8 +1,10 @@
 using Basket.API.Data;
 using Basket.API.Data.Interfaces;
+using Basket.API.GrpcServices;
 using Basket.API.Helpers;
 using Basket.API.Repositories;
 using Basket.API.Repositories.Interfaces;
+using Discount.GRPC.Protos;
 using EventBusRabbitMQ;
 using EventBusRabbitMQ.Producer;
 using RabbitMQ.Client;
@@ -41,6 +43,16 @@ builder.Services.AddSingleton<IRabbitMQConnection>(
                 }
                 );
 builder.Services.AddSingleton<EventBusRabbitMQProducer>();
+builder.Services.AddGrpcClient<DiscountProtoService.DiscountProtoServiceClient>( o => o.Address = new Uri(builder.Configuration["GrpcSettings:DiscountUrl"]))
+    .ConfigurePrimaryHttpMessageHandler(() =>
+    {
+        var handler = new HttpClientHandler();
+        handler.ServerCertificateCustomValidationCallback =
+            HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+
+        return handler;
+    });
+builder.Services.AddScoped<DiscountGrpcService>();
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
