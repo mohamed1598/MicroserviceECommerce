@@ -43,14 +43,16 @@ builder.Services.AddSingleton<IRabbitMQConnection>(
                 }
                 );
 builder.Services.AddSingleton<EventBusRabbitMQProducer>();
-builder.Services.AddGrpcClient<DiscountProtoService.DiscountProtoServiceClient>( o => o.Address = new Uri(builder.Configuration["GrpcSettings:DiscountUrl"]))
+builder.Services.AddGrpcClient<DiscountProtoService.DiscountProtoServiceClient>( o => o.Address = new Uri(builder.Configuration["GrpcSettings:DiscountUrl"]!))
     .ConfigurePrimaryHttpMessageHandler(() =>
     {
-        var handler = new HttpClientHandler();
-        handler.ServerCertificateCustomValidationCallback =
-            HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+		var handler = new HttpClientHandler
+		{
+			ServerCertificateCustomValidationCallback =
+			HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+		};
 
-        return handler;
+		return handler;
     });
 builder.Services.AddScoped<DiscountGrpcService>();
 builder.Services.AddControllers();

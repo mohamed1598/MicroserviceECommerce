@@ -27,7 +27,7 @@ namespace Basket.API.Controllers
             _discountGrpcService = discountGrpcService;
         }
 
-        [HttpGet]
+        [HttpGet("{userName}")]
         [ProducesResponseType(typeof(BasketCart),(int)HttpStatusCode.OK)]
         public async Task<ActionResult<BasketCart?>> GetBasket(string userName)
         {
