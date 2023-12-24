@@ -55,10 +55,17 @@ services:
       context: .
       dockerfile: src/Discount/Discount.GRPC/Dockerfile
 
+  shopping.aggregator:
+    image: ${DOCKER_REGISTRY-}shoppingaggregator
+    build:
+      context: .
+      dockerfile: src/ApiGateway/Shopping.Aggreagtor/Dockerfile
+
 volumes:
     mongo_data:
     postgres_data:
     pgadmin_data:
+
 
 
 
